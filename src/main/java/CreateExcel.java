@@ -25,7 +25,6 @@ public class CreateExcel {
             rows.add(sheet.createRow(i));
         }
 
-
         rows.get(1).createCell(1).setCellValue("n");
         rows.get(2).createCell(1).setCellValue("Xmax");
         rows.get(3).createCell(1).setCellValue("Xmin");
@@ -40,8 +39,7 @@ public class CreateExcel {
 
         var r = new Random();
 
-
-        for (int i = 0; i < 10000; i++) {
+        for (int i = 0; i < 100000; i++) {
             list.add(r.nextDouble(1.0, 100000.0));
         }
 
@@ -110,6 +108,12 @@ public class CreateExcel {
         relativeFrequency();
 
         percentageFrequency();
+
+        cumulativeBellow("K", "G");
+        cumulativeBellow("L", "J");
+
+        cumulativeAbove("M", "G");
+        cumulativeAbove("N", "J");
 
         if (false) {
 
@@ -401,6 +405,7 @@ public class CreateExcel {
         return i2 - 2;
 
     }
+
     public static void generateFrequency(String intervals) {
 
         int i = 3;
@@ -413,7 +418,7 @@ public class CreateExcel {
 
             value = evaluator.evaluate(cell("E" + i));
 
-            if(value == null){
+            if (value == null) {
                 break;
             }
 
@@ -433,7 +438,6 @@ public class CreateExcel {
             String lsS = frt.format(ls);
 
 
-
             cell("G" + i).setCellFormula("COUNTIFS(" + intervals + ", " + "\"<=" + lsS + "\"," + intervals + ", \">=" + liS + "\")");
 
             i++;
@@ -442,30 +446,79 @@ public class CreateExcel {
 
     }
 
-    public static void setMidPoint(){
+    public static void setMidPoint() {
 
-        for(int i = 3; sheet.getRow(i - 1).getCell(6) != null ; i++){
+        for (int i = 3; sheet.getRow(i - 1).getCell(6) != null; i++) {
             cell("H" + i).setCellFormula("(E" + i + " + F" + i + ")/2");
         }
 
 
     }
 
-    public static void relativeFrequency(){
+    public static void relativeFrequency() {
 
-        for(int i = 3; sheet.getRow(i - 1).getCell(6) != null; i++){
+        for (int i = 3; sheet.getRow(i - 1).getCell(6) != null; i++) {
             cell("I" + i).setCellFormula("G" + i + "/$C$2");
         }
 
     }
-    public static void percentageFrequency(){
 
-        for(int i = 3; sheet.getRow(i - 1).getCell(6) != null; i++){
-            cell("J" + i).setCellFormula("1+1");
+    public static void percentageFrequency() {
+
+        for (int i = 3; sheet.getRow(i - 1).getCell(6) != null; i++) {
+            cell("J" + i).setCellFormula("(G" + i + "*100)/$C$2");
         }
 
     }
 
+    public static void cumulativeBellow(String letterOfCell, String letterOfCumulate) {
+
+        if (letterOfCumulate.length() != 1 || letterOfCell.length() != 1) {
+            System.out.println("Letter provided incorrect");
+            return;
+        }
+
+
+        for (int i = 3; sheet.getRow(i - 1).getCell(6) != null; i++) {
+
+            if (i == 3) {
+                cell(letterOfCell + i).setCellFormula(letterOfCumulate + i);
+                continue;
+            }
+
+            cell(letterOfCell + i).setCellFormula(letterOfCumulate + i + "+" + letterOfCell + (i - 1));
+
+        }
+
+    }
+
+    public static void cumulativeAbove(String letterOfCell, String letterOfCumulate) {
+
+        if (letterOfCumulate.length() != 1 || letterOfCell.length() != 1) {
+            System.out.println("Letter provided incorrect");
+            return;
+        }
+
+        int tam = 3;
+
+        while (sheet.getRow(tam - 1).getCell(6) != null) {
+            tam++;
+        }
+
+        tam--;
+
+        for (int i = tam; sheet.getRow(i - 2).getCell(6) != null; i--) {
+
+            if (i == tam) {
+                cell(letterOfCell + i).setCellFormula(letterOfCumulate + i);
+                continue;
+            }
+
+            cell(letterOfCell + i).setCellFormula(letterOfCumulate + i + "+" + letterOfCell + (i + 1));
+
+        }
+
+    }
 
 
     //Função q retorne a celula por uma string => "C5" -> row.get(2).getCell(4)
