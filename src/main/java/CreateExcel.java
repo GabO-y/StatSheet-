@@ -20,7 +20,6 @@ public class CreateExcel {
 
     public static void main(String[] args) {
 
-
         for (int i = 0; i <= 6; i++) {
             rows.add(sheet.createRow(i));
         }
@@ -39,8 +38,8 @@ public class CreateExcel {
 
         var r = new Random();
 
-        for (int i = 0; i < 100000; i++) {
-            list.add(r.nextDouble(1.0, 100000.0));
+        for (int i = 0; i < 10000; i++) {
+            list.add(r.nextDouble(1.0, 10000000.0));
         }
 
         infos = infos(list);
@@ -99,9 +98,9 @@ public class CreateExcel {
 
         int i = addClass(2);
 
-        sheet.getRow(5).getCell(3).setCellValue(i);
+        cell("D6").setCellValue(i);
 
-        generateFrequency(valoresIntevals);
+        frequency(valoresIntevals);
 
         setMidPoint();
 
@@ -114,178 +113,7 @@ public class CreateExcel {
 
         cumulativeAbove("M", "G");
         cumulativeAbove("N", "J");
-
-        if (false) {
-
-
-//        for ( i = 3; i <= infos.get("K") - 1; i++) {
-//            rows.get(i).createCell(4).setCellFormula("F" + i);
-//        }
-//
-//        for (i = 3; i <= infos.get("K") - 1 ; i++) {
-//
-//            String formula = "E";
-//
-//            formula += i + 1;
-//
-//            formula += "+" + c;
-//
-//            rows.get(i).createCell(5).setCellFormula(formula);
-//        }
-
-
-            var i2 = i - 1;
-
-            FormulaEvaluator evaluator = w.getCreationHelper().createFormulaEvaluator();
-            CellValue value = evaluator.evaluate(rows.get(i2).getCell(5));
-
-            //Apenas para receber o valor da celula
-            var x = value.getNumberValue();
-
-
-            addClass(i2);
-
-            i2 = i - 1;
-
-            evaluator = w.getCreationHelper().createFormulaEvaluator();
-
-            value = null;
-
-            while (value == null) {
-                value = evaluator.evaluate(rows.get(i2).getCell(5));
-                i2--;
-            }
-
-            x = value.getNumberValue();
-
-            i2++;
-
-            while (x < infos.get("Xmax")) {
-
-                if (sheet.getRow(i2) == null) {
-                    rows.add(sheet.createRow(i2));
-                }
-
-                rows.get(i2).createCell(4).setCellFormula("F" + i2);
-                rows.get(i2).createCell(5).setCellFormula("E" + (i2 + 1) + "+" + c);
-
-                evaluator = w.getCreationHelper().createFormulaEvaluator();
-                value = evaluator.evaluate(rows.get(i2).getCell(5));
-                x = value.getNumberValue();
-
-                var a = infos.get("K");
-                infos.remove("K");
-                infos.put("K", a + 1);
-
-                i2++;
-
-                rows.get(5).getCell(2).setCellValue(infos.get("K"));
-            }
-
-
-            String limitesSuperiores = "$F$3:$F$" + i2;
-
-
-            for (i = 2; i < infos.get("K") + 2; i++) {
-
-                double ls;
-                double li;
-
-
-                value = evaluator.evaluate(rows.get(i).getCell(4));
-                li = value.getNumberValue();
-
-
-                value = evaluator.evaluate(rows.get(i).getCell(5));
-                ls = value.getNumberValue();
-
-                //System.out.println(li + " - " + ls);
-
-                NumberFormat frt = NumberFormat.getInstance(Locale.getDefault());
-
-                // Formata o número de acordo com a localização do sistema
-                //Pois quando ele envia a função, ele leva o numero separando
-                //as casas decimais por "." e sistemas q estão usando "," ele nn funciona
-                String liS = frt.format(li);
-                String lsS = frt.format(ls);
-
-                System.out.println(liS + " - " + lsS);
-
-                rows.get(i).createCell(6).setCellFormula("COUNTIFS(" + valoresIntevals + ", " + "\"<=" + lsS + "\"," + valoresIntevals + ", \">=" + liS + "\")");
-            }
-
-
-            for (int i3 = 2, l = 3; i3 < infos.get("K") + 2; i3++, l++) {
-                rows.get(i3).createCell(7).setCellFormula("(E" + l + "+ F" + l + ")/2");
-            }
-
-            for (int i3 = 2, l = 3; i3 < infos.get("K") + 2; i3++, l++) {
-                rows.get(i3).createCell(8).setCellFormula("G" + l + "/$C$2");
-            }
-
-            for (int i3 = 2, l = 3; i3 < infos.get("K") + 2; i3++, l++) {
-                rows.get(i3).createCell(9).setCellFormula("(G" + l + " * 100)" + "/$C$2");
-            }
-
-            rows.get(2).createCell(10).setCellFormula("G3");
-
-            for (int i3 = 3, l = 4; i3 < infos.get("K") + 2; i3++, l++) {
-                rows.get(i3).createCell(10).setCellFormula("G" + l + "+K" + (l - 1));
-            }
-
-            rows.get(2).createCell(11).setCellFormula("J3");
-
-            for (int i3 = 3, l = 4; i3 < infos.get("K") + 2; i3++, l++) {
-                rows.get(i3).createCell(11).setCellFormula("J" + l + "+L" + (l - 1));
-            }
-
-            rows.get(12).createCell(12).setCellFormula("G13");
-
-            for (int i3 = 11, l = 12; i3 > 1; i3--, l--) {
-                rows.get(i3).createCell(12).setCellFormula("G" + l + "+M" + (l + 1));
-            }
-
-            rows.get(12).createCell(13).setCellFormula("J13");
-
-            for (int i3 = 11, l = 12; i3 > 1; i3--, l--) {
-                rows.get(i3).createCell(13).setCellFormula("J" + l + "+N" + (l + 1));
-            }
-
-
-            var strings = new String[]{"Média", "Moda", "Mediana", "Variância", "Desvio Padrão"};
-
-            for (int i3 = 8, l = 0; i3 < 13; i3++, l++) {
-
-
-                if (sheet.getRow(i3) == null) {
-                    sheet.createRow(i3);
-                }
-                if (sheet.getRow(i3).getCell(1) == null) {
-                    rows.get(i3).createCell(1).setCellValue(strings[l]);
-                } else {
-                    sheet.getRow(i3).getCell(1).setCellValue(strings[l]);
-                }
-
-            }
-
-
-            strings = new String[]{"AVERAGE(" + valoresIntevals + ")", "MODE(" + valoresIntevals + ")", "MEDIAN(" + valoresIntevals + ")", "VAR(" + valoresIntevals + ")", "STDEV(" + valoresIntevals + ")"};
-
-
-            for (int i3 = 8, l = 0; i3 < 13; i3++, l++) {
-
-                if (sheet.getRow(i3).getCell(2) == null) {
-                    rows.get(i3).createCell(2).setCellFormula(strings[l]);
-                } else {
-                    rows.get(i3).getCell(2).setCellFormula(strings[l]);
-                }
-
-            }
-
-            w.getCreationHelper().createFormulaEvaluator().evaluateAll();
-
-        }
-
+        
         try (FileOutputStream fileOutput = new FileOutputStream("ArquivoCriado.xlsx")) {
 
             w.write(fileOutput);
@@ -406,6 +234,8 @@ public class CreateExcel {
 
     }
 
+    //Antiga forma de pegar frequencia
+    /*
     public static void generateFrequency(String intervals) {
 
         int i = 3;
@@ -443,9 +273,17 @@ public class CreateExcel {
             i++;
         }
 
+    }
+    */
+    public static void frequency(String intervals){
+
+        for(int i = 3, l = 2; cell("F"+i,false) != null; i++, l++){
+            cell("G" + i).setCellFormula("COUNTIFS(" + intervals + "," + "\"<=\" & F" + i + ", " + intervals + ", " + "\">=\" & E" + i + ")");
+        }
+
+        //=CONT.SES(A1:A100001; "<=" & F3; A1:A100001; ">=65")
 
     }
-
     public static void setMidPoint() {
 
         for (int i = 3; sheet.getRow(i - 1).getCell(6) != null; i++) {
@@ -522,6 +360,40 @@ public class CreateExcel {
 
 
     //Função q retorne a celula por uma string => "C5" -> row.get(2).getCell(4)
+    public static Cell cell(String localization, Boolean createCell) {
+
+        int letter = 0;
+        int number = 0;
+
+        if(!createCell){
+
+        var fields = localization.replaceAll(String.valueOf(localization.charAt(0)), localization.charAt(0) + ",").split(",");
+
+        if (!(fields[0].charAt(0) >= 65 && fields[0].charAt(0) <= 90)) {
+            System.out.println("Letter input incorrect");
+            return sheet.getRow(0).getCell(0);
+        }
+
+        letter = (fields[0].charAt(0)) - 65;
+        number = Integer.parseInt(fields[1]) - 1;
+
+
+        }else{
+            return cell(localization);
+        }
+
+        try{
+
+        return sheet.getRow(number).getCell(letter);
+
+        }catch(Exception _){
+
+            return null;
+
+        }
+
+    }
+
     public static Cell cell(String localization) {
 
         var fields = localization.replaceAll(String.valueOf(localization.charAt(0)), localization.charAt(0) + ",").split(",");
