@@ -16,9 +16,9 @@ public class CreateExcel {
     static CellValue value;
     static List<Row> rows = new ArrayList<>();
 
-    public static void main(String[] args) {
+    static Map<String, Double> infos;
 
-        System.out.println("Aqui: " + cell("A1"));
+    public static void main(String[] args) {
 
 
         for (int i = 0; i <= 6; i++) {
@@ -41,11 +41,11 @@ public class CreateExcel {
         var r = new Random();
 
 
-        for (int i = 0; i < 1000; i++) {
-            list.add(r.nextDouble(1.0, 1000.0));
+        for (int i = 0; i < 100000; i++) {
+            list.add(r.nextDouble(1.0, 100000.0));
         }
 
-        Map<String, Double> infos = infos(list);
+        infos = infos(list);
         Collections.sort(list);
 
         CellStyle style = w.createCellStyle();
@@ -99,11 +99,13 @@ public class CreateExcel {
 
         String c = "$D$7";
 
-        int i = addClass(2, infos);
+        int i = addClass(2);
 
         sheet.getRow(5).getCell(3).setCellValue(i);
 
         generateFrequency(i, valoresIntevals);
+
+        setMidPoint();
 
         if (false) {
 
@@ -133,7 +135,7 @@ public class CreateExcel {
             var x = value.getNumberValue();
 
 
-            addClass(i2, infos);
+            addClass(i2);
 
             i2 = i - 1;
 
@@ -353,7 +355,7 @@ public class CreateExcel {
 
     }
 
-    public static int addClass(int i2, Map<String, Double> infos) {
+    public static int addClass(int i2) {
 
         //Adiciona as duas primeiras linhas necessarias para construir as classes
         sheet.getRow(2).createCell(4).setCellFormula(infos.get("minL").toString());
@@ -363,8 +365,6 @@ public class CreateExcel {
         value = evaluator.evaluate(sheet.getRow(i2).getCell(5));
 
         var x = value.getNumberValue();
-
-        System.out.println("Aqui: " + x);
 
         i2++;
 
@@ -399,7 +399,6 @@ public class CreateExcel {
     }
     public static void generateFrequency(int k, String intervals) {
 
-
         int i = 3, l = 0;
 
 
@@ -417,8 +416,6 @@ public class CreateExcel {
 
             var ls = value.getNumberValue();
 
-            System.out.println(li + " - " + ls);
-
             NumberFormat frt = NumberFormat.getInstance(Locale.getDefault());
 
             // Formata o número de acordo com a localização do sistema
@@ -427,6 +424,7 @@ public class CreateExcel {
 
             String liS = frt.format(li);
             String lsS = frt.format(ls);
+
 
 
             cell("G" + i).setCellFormula("COUNTIFS(" + intervals + ", " + "\"<=" + lsS + "\"," + intervals + ", \">=" + liS + "\")");
@@ -439,6 +437,15 @@ public class CreateExcel {
 
     }
 
+    public static void setMidPoint(){
+
+        for(int i = 3; i < infos.get("K") + 3; i++){
+            cell("H" + i).setCellFormula("(E" + i + " + F" + i + ")/2");
+        }
+
+
+    }
+
     //Função q retorne a celula por uma string => "C5" -> row.get(2).getCell(4)
     public static Cell cell(String localization) {
 
@@ -446,7 +453,7 @@ public class CreateExcel {
 
         if (!(fields[0].charAt(0) >= 65 && fields[0].charAt(0) <= 90)) {
             System.out.println("Letter input incorrect");
-            return null;
+            return sheet.getRow(0).getCell(0);
         }
 
         int letter = (fields[0].charAt(0)) - 65;
