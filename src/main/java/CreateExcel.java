@@ -41,7 +41,7 @@ public class CreateExcel {
         var r = new Random();
 
 
-        for (int i = 0; i < 100000; i++) {
+        for (int i = 0; i < 1000; i++) {
             list.add(r.nextDouble(1.0, 100000.0));
         }
 
@@ -103,9 +103,11 @@ public class CreateExcel {
 
         sheet.getRow(5).getCell(3).setCellValue(i);
 
-        generateFrequency(i, valoresIntevals);
+        generateFrequency(valoresIntevals);
 
         setMidPoint();
+
+        relativeFrequency();
 
         if (false) {
 
@@ -397,18 +399,23 @@ public class CreateExcel {
         return i2 - 2;
 
     }
-    public static void generateFrequency(int k, String intervals) {
+    public static void generateFrequency(String intervals) {
 
-        int i = 3, l = 0;
+        int i = 3;
+
+        while (true) {
 
 
-        while (l < k) {
 
             evaluator = w.getCreationHelper().createFormulaEvaluator();
 
             //Pega celula do limite inferior
 
             value = evaluator.evaluate(cell("E" + i));
+
+            if(value == null){
+                break;
+            }
 
             var li = value.getNumberValue();
 
@@ -430,8 +437,6 @@ public class CreateExcel {
             cell("G" + i).setCellFormula("COUNTIFS(" + intervals + ", " + "\"<=" + lsS + "\"," + intervals + ", \">=" + liS + "\")");
 
             i++;
-            l++;
-
         }
 
 
@@ -439,10 +444,18 @@ public class CreateExcel {
 
     public static void setMidPoint(){
 
-        for(int i = 3; i < infos.get("K") + 3; i++){
+        for(int i = 3; sheet.getRow(i - 1).getCell(6) != null ; i++){
             cell("H" + i).setCellFormula("(E" + i + " + F" + i + ")/2");
         }
 
+
+    }
+
+    public static void relativeFrequency(){
+
+        for(int i = 3; sheet.getRow(i - 1).getCell(6) != null; i++){
+            cell("I" + i).setCellFormula("G" + i + "/$C$2");
+        }
 
     }
 
