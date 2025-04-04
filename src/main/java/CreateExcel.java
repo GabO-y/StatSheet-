@@ -1,5 +1,6 @@
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.xmlbeans.impl.xb.xsdschema.AnyDocument;
 
 import java.io.FileOutputStream;
 import java.io.OutputStream;
@@ -8,7 +9,7 @@ import java.util.*;
 
 public class CreateExcel {
 
-    static Workbook  w = new XSSFWorkbook();
+    static Workbook w = new XSSFWorkbook();
     static Sheet sheet = w.createSheet("Planilha");
 
     static FormulaEvaluator evaluator = w.getCreationHelper().createFormulaEvaluator();
@@ -17,8 +18,7 @@ public class CreateExcel {
 
     public static void main(String[] args) {
 
-
-
+        System.out.println("Aqui: " + cell("A1"));
 
 
         for (int i = 0; i <= 6; i++) {
@@ -37,6 +37,7 @@ public class CreateExcel {
 
         List<Double> list = new ArrayList<>();
 
+
         var r = new Random();
 
 
@@ -44,10 +45,8 @@ public class CreateExcel {
             list.add(r.nextDouble(1.0, 1000.0));
         }
 
-
+        Map<String, Double> infos = infos(list);
         Collections.sort(list);
-
-        var infos = infos(list);
 
         CellStyle style = w.createCellStyle();
         DataFormat format = w.createDataFormat();
@@ -100,46 +99,41 @@ public class CreateExcel {
 
         String c = "$D$7";
 
-        rows.get(2).createCell(4).setCellFormula(infos.get("minL").toString());
-        rows.get(2).createCell(5).setCellFormula("E3+$D$7");
+        int i = addClass(2, infos);
 
-        int i;
+        sheet.getRow(5).getCell(3).setCellValue(i);
 
-        for ( i = 3; i <= infos.get("K") + 1; i++) {
-            rows.get(i).createCell(4).setCellFormula("F" + i);
-        }
-
-        for (i = 3; i <= infos.get("K") + 1; i++) {
-
-            String formula = "E";
-
-            formula += i + 1;
-
-            formula += "+" + c;
-
-            rows.get(i).createCell(5).setCellFormula(formula);
-        }
-
-
-
-        var i2 = i - 1;
-
-        FormulaEvaluator evaluator = w.getCreationHelper().createFormulaEvaluator();
-        CellValue value = evaluator.evaluate(rows.get(i2).getCell(5));
-
-        //Apenas para receber o valor da celula
-        var x = value.getNumberValue();
-//
-//        System.out.println(x);
-
-        //i2++;
-
-        addNecessario(i2, infos);
-
-        
-        System.out.println("Aqui: " + infos.get("K"));
+        generateFrequency(i, valoresIntevals);
 
         if (false) {
+
+
+//        for ( i = 3; i <= infos.get("K") - 1; i++) {
+//            rows.get(i).createCell(4).setCellFormula("F" + i);
+//        }
+//
+//        for (i = 3; i <= infos.get("K") - 1 ; i++) {
+//
+//            String formula = "E";
+//
+//            formula += i + 1;
+//
+//            formula += "+" + c;
+//
+//            rows.get(i).createCell(5).setCellFormula(formula);
+//        }
+
+
+            var i2 = i - 1;
+
+            FormulaEvaluator evaluator = w.getCreationHelper().createFormulaEvaluator();
+            CellValue value = evaluator.evaluate(rows.get(i2).getCell(5));
+
+            //Apenas para receber o valor da celula
+            var x = value.getNumberValue();
+
+
+            addClass(i2, infos);
 
             i2 = i - 1;
 
@@ -246,6 +240,7 @@ public class CreateExcel {
             for (int i3 = 11, l = 12; i3 > 1; i3--, l--) {
                 rows.get(i3).createCell(13).setCellFormula("J" + l + "+N" + (l + 1));
             }
+
 
             var strings = new String[]{"Média", "Moda", "Mediana", "Variância", "Desvio Padrão"};
 
@@ -358,49 +353,115 @@ public class CreateExcel {
 
     }
 
-    public static void addNecessario(int i2, Map<String, Double> infos){
+    public static int addClass(int i2, Map<String, Double> infos) {
 
-        System.out.println("Usou a função sim bebes");
+        //Adiciona as duas primeiras linhas necessarias para construir as classes
+        sheet.getRow(2).createCell(4).setCellFormula(infos.get("minL").toString());
+        sheet.getRow(2).createCell(5).setCellFormula("E3+$D$7");
 
-         evaluator = w.getCreationHelper().createFormulaEvaluator();
-         value = evaluator.evaluate(rows.get(i2).getCell(5));
+        evaluator = w.getCreationHelper().createFormulaEvaluator();
+        value = evaluator.evaluate(sheet.getRow(i2).getCell(5));
 
-         var x = value.getNumberValue();
+        var x = value.getNumberValue();
 
-         i2++;
+        System.out.println("Aqui: " + x);
 
-        while(x < infos.get("Xmax")){
+        i2++;
 
-            if(sheet.getRow(i2) == null){
+        while (x < infos.get("Xmax")) {
+
+            if (sheet.getRow(i2) == null) {
                 rows.add(sheet.createRow(i2));
                 rows.get(i2).createCell(4);
                 rows.get(i2).createCell(5);
             }
-            if(rows.get(i2).getCell(4) == null){
+            if (rows.get(i2).getCell(4) == null) {
                 rows.get(i2).createCell(4);
             }
-            if(rows.get(i2).getCell(5) == null){
+            if (rows.get(i2).getCell(5) == null) {
                 rows.get(i2).createCell(5);
             }
 
-            rows.get(i2).getCell(4).setCellFormula("F" + i2);
-            rows.get(i2).getCell(5).setCellFormula("E" + (i2 + 1) + " + " + "$D$7");
+            sheet.getRow(i2).getCell(4).setCellFormula("F" + i2);
+            sheet.getRow(i2).getCell(5).setCellFormula("E" + (i2 + 1) + " + " + "$D$7");
 
             evaluator = w.getCreationHelper().createFormulaEvaluator();
-            value = evaluator.evaluate(rows.get(i2).getCell(5));
+            value = evaluator.evaluate(sheet.getRow(i2).getCell(5));
 
             //Apenas para receber o valor da celula
             x = value.getNumberValue();
 
             i2++;
 
-            var k = infos.get("K") + 1;
-            infos.remove("K");
-            infos.put("K", k);
+        }
+        return i2 - 2;
 
-            sheet.getRow(5).getCell(3).setCellValue(k);
+    }
+    public static void generateFrequency(int k, String intervals) {
+
+
+        int i = 3, l = 0;
+
+
+        while (l < k) {
+
+            evaluator = w.getCreationHelper().createFormulaEvaluator();
+
+            //Pega celula do limite inferior
+
+            value = evaluator.evaluate(cell("E" + i));
+
+            var li = value.getNumberValue();
+
+            value = evaluator.evaluate(cell("F" + i));
+
+            var ls = value.getNumberValue();
+
+            System.out.println(li + " - " + ls);
+
+            NumberFormat frt = NumberFormat.getInstance(Locale.getDefault());
+
+            // Formata o número de acordo com a localização do sistema
+            //Pois quando ele envia a função, ele leva o numero separando
+            //as casas decimais por "." e sistemas q estão usando "," ele nn funciona
+
+            String liS = frt.format(li);
+            String lsS = frt.format(ls);
+
+
+            cell("G" + i).setCellFormula("COUNTIFS(" + intervals + ", " + "\"<=" + lsS + "\"," + intervals + ", \">=" + liS + "\")");
+
+            i++;
+            l++;
 
         }
+
+
+    }
+
+    //Função q retorne a celula por uma string => "C5" -> row.get(2).getCell(4)
+    public static Cell cell(String localization) {
+
+        var fields = localization.replaceAll(String.valueOf(localization.charAt(0)), localization.charAt(0) + ",").split(",");
+
+        if (!(fields[0].charAt(0) >= 65 && fields[0].charAt(0) <= 90)) {
+            System.out.println("Letter input incorrect");
+            return null;
+        }
+
+        int letter = (fields[0].charAt(0)) - 65;
+        int number = Integer.parseInt(fields[1]) - 1;
+
+
+        if (sheet.getRow(number) == null) {
+            sheet.createRow(number);
+        }
+
+        if (sheet.getRow(number).getCell(letter) == null) {
+            sheet.getRow(number).createCell(letter);
+        }
+
+        return sheet.getRow(number).getCell(letter);
 
     }
 
