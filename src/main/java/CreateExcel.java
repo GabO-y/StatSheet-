@@ -41,7 +41,7 @@ public class CreateExcel {
         var r = new Random();
 
 
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 10000; i++) {
             list.add(r.nextDouble(1.0, 100000.0));
         }
 
@@ -108,6 +108,8 @@ public class CreateExcel {
         setMidPoint();
 
         relativeFrequency();
+
+        percentageFrequency();
 
         if (false) {
 
@@ -405,8 +407,6 @@ public class CreateExcel {
 
         while (true) {
 
-
-
             evaluator = w.getCreationHelper().createFormulaEvaluator();
 
             //Pega celula do limite inferior
@@ -458,6 +458,15 @@ public class CreateExcel {
         }
 
     }
+    public static void percentageFrequency(){
+
+        for(int i = 3; sheet.getRow(i - 1).getCell(6) != null; i++){
+            cell("J" + i).setCellFormula("1+1");
+        }
+
+    }
+
+
 
     //Função q retorne a celula por uma string => "C5" -> row.get(2).getCell(4)
     public static Cell cell(String localization) {
