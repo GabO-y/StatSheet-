@@ -15,7 +15,6 @@ public class CreateExcel {
     static FormulaEvaluator evaluator = w.getCreationHelper().createFormulaEvaluator();
     static CellValue value;
     static List<Row> rows = new ArrayList<>();
-
     static Map<String, Double> infos;
 
     public static void main(String[] args) {
@@ -24,12 +23,9 @@ public class CreateExcel {
             rows.add(sheet.createRow(i));
         }
 
-        rows.get(1).createCell(1).setCellValue("n");
-        rows.get(2).createCell(1).setCellValue("Xmax");
-        rows.get(3).createCell(1).setCellValue("Xmin");
-        rows.get(4).createCell(1).setCellValue("At");
-        rows.get(5).createCell(1).setCellValue("K");
-        rows.get(6).createCell(1).setCellValue("C");
+
+
+        titles();
 
         //var list = List.of(10.0, 34.9, 80.8, 22.4, 10.0, 34.9, 80.8, 22.4, 10.0, 34.9, 80.8, 22.4, 10.0, 34.9, 80.8, 22.4);
 
@@ -38,7 +34,7 @@ public class CreateExcel {
 
         var r = new Random();
 
-        for (int i = 0; i < 10000; i++) {
+        for (int i = 0; i < 100; i++) {
             list.add(r.nextDouble(1.0, 10000000.0));
         }
 
@@ -62,37 +58,8 @@ public class CreateExcel {
         }
 
         //Intervalo dos valores
-        String valoresIntevals = "A1:A" + (list.size() + 1);
+        String valoresIntevals = "A2:A" + (list.size() + 1);
 
-
-        //Linha do N
-        rows.get(1).createCell(2).setCellFormula("COUNT(" + valoresIntevals + ")");
-        //Linha do Xmax
-        rows.get(2).createCell(2).setCellFormula("MAX(" + valoresIntevals + ")");
-        //Linha do Xmin
-        rows.get(3).createCell(2).setCellFormula("MIN(" + valoresIntevals + ")");
-        //Linha da Amplitude total
-        rows.get(4).createCell(2).setCellFormula("C3-C4");
-
-        //Linha do K e seu arredondamento
-        rows.get(5).createCell(2).setCellFormula("1 + 3.3 * LOG10(C2)");
-        rows.get(5).createCell(3).setCellFormula("ROUND(C6, 0)");
-
-        //Linha do C e seu arredondamento
-        rows.get(6).createCell(2).setCellFormula("C5/C6");
-        rows.get(6).createCell(3).setCellFormula("CEILING(C7, 5)");
-
-        String[] linha1 = new String[]{"Li", "Ls", "Fj", "Xj", "Fj", "Fj%", "F↓", "F↓%", "F↑", "F↑%"};
-
-        for (int i = 4, l = 0; i < 14; i++, l++) {
-
-            try {
-                rows.get(1).createCell(i).setCellValue(linha1[l]);
-            } catch (Exception e) {
-                rows.get(1).getCell(i).setCellValue(linha1[l]);
-            }
-
-        }
 
         String c = "$D$7";
 
@@ -113,7 +80,7 @@ public class CreateExcel {
 
         cumulativeAbove("M", "G");
         cumulativeAbove("N", "J");
-        
+
         try (FileOutputStream fileOutput = new FileOutputStream("ArquivoCriado.xlsx")) {
 
             w.write(fileOutput);
@@ -188,6 +155,46 @@ public class CreateExcel {
         }
 
         return infos;
+
+    }
+
+    public static void titles(){
+
+        cell("A1").setCellValue("Valores");
+
+        String[] information = new String[] {"N", "Xmax", "Xmin", "At","K", "C"};
+
+        for(int i = 2, l = 0; i <= 7; i++,l++){
+            cell("B" + i).setCellValue(information[l]);
+        }
+
+        cell("E2").setCellValue("Li");
+        cell("F2").setCellValue("Ls");
+        cell("G2").setCellValue("Fj");
+        cell("H2").setCellValue("Xj");
+        cell("I2").setCellValue("Fr");
+        cell("J2").setCellValue("Fr%");
+        cell("K2").setCellValue("F↓");
+        cell("L2").setCellValue("F↓%");
+        cell("M2").setCellValue("F↑");
+        cell("N2").setCellValue("F↑%");
+
+        information = new String[] {
+                "COUNT(" + "A2:A101" + ")",
+                "MAX(" + "A2:A101" + ")",
+                "MIN(" + "A2:A101" + ")",
+                "C3-C4",
+                "1 + 3.3 * LOG10(C2)",
+                "C5/C6"
+        };
+
+        for(int i = 2, l = 0; i <= 7; i++, l++){
+            cell("C" + i).setCellFormula(information[l]);
+        }
+
+        cell("D6").setCellFormula("ROUND(C6, 0)");
+        cell("D7").setCellFormula("CEILING(C7, 5)");
+
 
     }
 
